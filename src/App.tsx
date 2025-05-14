@@ -10,6 +10,7 @@ import CapTablePage from "./pages/CapTablePage";
 import DealBuilderPage from "./pages/DealBuilder";
 import DocumentsPage from "./pages/Documents";
 import NotFound from "./pages/NotFound";
+import Initial from "./pages/Initial";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/deal-builder" element={<DealBuilderPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/authuser" element={<Initial />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import ChatContainer from "@/components/ChatContainer";
@@ -6,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Steps, Step, StepTitle, StepDescription } from "@/components/ui/steps";
+import { Badge } from "@/components/ui/badge";
 
 const CapTablePage = () => {
   const [currentStep, setCurrentStep] = useState(0);

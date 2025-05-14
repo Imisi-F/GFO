@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import ChatContainer from "@/components/ChatContainer";
@@ -6,9 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Steps, Step, StepTitle, StepDescription } from "@/components/ui/steps";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Send, Edit } from "lucide-react";
 
 const CapTablePage = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [selectedFounder, setSelectedFounder] = useState<string | null>(null);
+  const [editRequest, setEditRequest] = useState({
+    founderName: "",
+    currentEquity: "",
+    requestedEquity: "",
+    justification: ""
+  });
   
   const steps = [
     {
@@ -45,6 +58,29 @@ const CapTablePage = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const handleEditRequest = (founder: typeof founderData[0]) => {
+    setSelectedFounder(founder.name);
+    setEditRequest({
+      founderName: founder.name,
+      currentEquity: founder.equity,
+      requestedEquity: "",
+      justification: ""
+    });
+  };
+
+  const handleSendRequest = () => {
+    // This would send the request to stakeholders
+    console.log("Sending request:", editRequest);
+    // Reset form
+    setSelectedFounder(null);
+    setEditRequest({
+      founderName: "",
+      currentEquity: "",
+      requestedEquity: "",
+      justification: ""
+    });
   };
 
   return (
@@ -156,6 +192,7 @@ const CapTablePage = () => {
                           <th className="text-left p-3">Vested</th>
                           <th className="text-left p-3">Cliff</th>
                           <th className="text-left p-3">Tokenized</th>
+                          <th className="text-left p-3">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -168,6 +205,83 @@ const CapTablePage = () => {
                             <td className="p-3">{founder.cliff}</td>
                             <td className="p-3">
                               <Badge variant={founder.tokenized === "Yes" ? "default" : "outline"}>{founder.tokenized}</Badge>
+                            </td>
+                            <td className="p-3">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditRequest(founder)}
+                                  >
+                                    <Edit className="h-4 w-4 mr-1" />
+                                    Edit
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-700">
+                                  <DialogHeader>
+                                    <DialogTitle>Edit Equity Request</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="grid gap-4 py-4">
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                      <Label htmlFor="name" className="text-right">
+                                        Name
+                                      </Label>
+                                      <Input
+                                        id="name"
+                                        value={editRequest.founderName}
+                                        className="col-span-3"
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                      <Label htmlFor="current-equity" className="text-right">
+                                        Current Equity
+                                      </Label>
+                                      <Input
+                                        id="current-equity"
+                                        value={editRequest.currentEquity}
+                                        className="col-span-3"
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                      <Label htmlFor="requested-equity" className="text-right">
+                                        Requested Equity
+                                      </Label>
+                                      <Input
+                                        id="requested-equity"
+                                        value={editRequest.requestedEquity}
+                                        onChange={(e) => setEditRequest({...editRequest, requestedEquity: e.target.value})}
+                                        className="col-span-3"
+                                        placeholder="e.g. 40%"
+                                      />
+                                    </div>
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                      <Label htmlFor="justification" className="text-right">
+                                        Justification
+                                      </Label>
+                                      <Textarea
+                                        id="justification"
+                                        value={editRequest.justification}
+                                        onChange={(e) => setEditRequest({...editRequest, justification: e.target.value})}
+                                        className="col-span-3"
+                                        placeholder="Explain why this change is requested..."
+                                        rows={4}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-end">
+                                    <Button 
+                                      className="bg-emerald-600 hover:bg-emerald-700" 
+                                      onClick={handleSendRequest}
+                                    >
+                                      <Send className="h-4 w-4 mr-2" />
+                                      Send Request to Stakeholders
+                                    </Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
                             </td>
                           </tr>
                         ))}

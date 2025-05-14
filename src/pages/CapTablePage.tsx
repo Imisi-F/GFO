@@ -5,16 +5,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EquityWizard from "@/components/EquityWizard";
 import CapTable from "@/components/CapTable";
 import AICFOCard from "@/components/AICFOCard";
+// import { tokenizeCapTable } from "@/lib/TokenizeCapTable";
+import { Button } from "@/components/ui/button";
 
 export default function CapTablePage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedFounder, setSelectedFounder] = useState<any>(null);
+
+  // const handleTokenize = async () => {
+  //   try {
+  //     const updated = await tokenizeCapTable(founderData);
+  //     setFounderData(updated); // update UI to show "Yes"
+  //     alert("Cap table tokenized successfully!");
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert("Error tokenizing cap table");
+  //   }
+  // };
 
   const [founderData, setFounderData] = useState([
     { name: "Alice", role: "CEO", equity: "50%", vested: "Yes", cliff: "1 year", tokenized: "No" },
     { name: "Bob", role: "CTO", equity: "30%", vested: "No", cliff: "1 year", tokenized: "No" },
     { name: "Charlie", role: "CMO", equity: "20%", vested: "Yes", cliff: "1 year", tokenized: "Yes" },
   ]);
+
 
   const steps = [
     { title: "Define Roles", description: "Describe each founder’s responsibilities" },
@@ -52,6 +66,11 @@ export default function CapTablePage() {
 
               <TabsContent value="table">
                 <CapTable founderData={founderData} onEdit={setSelectedFounder} />
+                <div className="mt-6 flex justify-end gap-3">
+                  <Button variant="outline">Export PDF</Button>
+                  <Button className="bg-emerald-600 hover:bg-emerald-700">Tokenize via Stellar</Button>
+                  {/* <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={handleTokenize}>Tokenize via Stellar</Button> */}
+                </div>
               </TabsContent>
             </Tabs>
           </div>

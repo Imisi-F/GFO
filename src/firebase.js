@@ -5,7 +5,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBaVm-pn_UMXZj42L5pTAJUqfSB2vpCFgw",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "gfo-hack.firebaseapp.com",
   projectId: "gfo-hack",
   storageBucket: "gfo-hack.firebasestorage.app",

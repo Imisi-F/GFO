@@ -1,13 +1,16 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import EditEquityDialog from "./EditEquityDialog";
 import { Edit } from "lucide-react";
+
+
+
 
 interface Props {
   founderData: any[];
   onEdit: (founder: any) => void;
 }
+
 
 export default function CapTable({ founderData, onEdit }: Props) {
   return (
@@ -47,11 +50,6 @@ export default function CapTable({ founderData, onEdit }: Props) {
               ))}
             </tbody>
           </table>
-        </div>
-
-        <div className="mt-6 flex justify-end gap-3">
-          <Button variant="outline">Export PDF</Button>
-          <Button className="bg-emerald-600 hover:bg-emerald-700">Tokenize via Stellar</Button>
         </div>
       </CardContent>
     </Card>

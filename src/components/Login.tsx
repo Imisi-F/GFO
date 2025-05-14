@@ -1,15 +1,41 @@
 import { signInWithPopup, auth, provider } from "../firebase";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import * as StellarSdk from "stellar-sdk";
 
 const Login = () => {
+  const db = getFirestore();
+
   const handleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log("Logged in as:", user.displayName);
+
+      console.log("Logged in:", user.displayName);
+
+      // STEP 1: Generate Stellar Keypair
+      const keypair = StellarSdk.Keypair.random();
+      const publicKey = keypair.publicKey();
+      const secretKey = keypair.secret();
+
+      console.log("Stellar Wallet:", publicKey);
+
+      // STEP 2: Fund it using Friendbot (testnet only)
+      await fetch(`https://friendbot.stellar.org?addr=${publicKey}`);
+
+      // STEP 3: Save wallet to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        name: user.displayName,
+        email: user.email,
+        publicKey,
+        secretKey, // 🔐 Only do this in testnet/hackathon mode!
+      });
+
+      console.log("Wallet saved to Firestore");
     } catch (err) {
-      console.error("Login failed:", err);
+      console.error("Login or wallet error:", err);
     }
   };
+
 
   return (
     <div className="flex justify-center mt-20">

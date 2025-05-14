@@ -27,7 +27,7 @@ const Login = () => {
         name: user.displayName,
         email: user.email,
         publicKey,
-        secretKey, // 🔐 Only do this in testnet/hackathon mode!
+        secretKey, // Only do this in testnet/hackathon mode!
       });
 
       console.log("Wallet saved to Firestore");
@@ -35,7 +35,6 @@ const Login = () => {
       console.error("Login or wallet error:", err);
     }
   };
-
 
   return (
     <div className="flex justify-center mt-20">

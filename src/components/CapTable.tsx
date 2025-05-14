@@ -1,16 +1,10 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import EditEquityDialog from "./EditEquityDialog";
-import { Edit } from "lucide-react";
-
-
-
 
 interface Props {
-  founderData: any[];
+  founderData: any[]; // Accept founderData as a prop
   onEdit: (founder: any) => void;
 }
-
 
 export default function CapTable({ founderData, onEdit }: Props) {
   return (
@@ -41,10 +35,12 @@ export default function CapTable({ founderData, onEdit }: Props) {
                   <td className="p-3">{founder.vested}</td>
                   <td className="p-3">{founder.cliff}</td>
                   <td className="p-3">
-                    <Badge variant={founder.tokenized === "Yes" ? "default" : "outline"}>{founder.tokenized}</Badge>
+                    <Badge variant={founder.tokenized === "Yes" ? "default" : "outline"}>
+                      {founder.tokenized}
+                    </Badge>
                   </td>
                   <td className="p-3">
-                    <EditEquityDialog founder={founder} onEdit={onEdit} />
+                    <button onClick={() => onEdit(founder)}>Edit</button>
                   </td>
                 </tr>
               ))}

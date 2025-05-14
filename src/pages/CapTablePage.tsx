@@ -1,34 +1,79 @@
 "use client";
 import Layout from "@/components/Layout";
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EquityWizard from "@/components/EquityWizard";
 import CapTable from "@/components/CapTable";
 import AICFOCard from "@/components/AICFOCard";
-// import { tokenizeCapTable } from "@/lib/TokenizeCapTable";
 import { Button } from "@/components/ui/button";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFounder } from "@/utils/soroban";
+import { useState, useEffect } from "react";
 
 export default function CapTablePage() {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [selectedFounder, setSelectedFounder] = useState<any>(null);
+  const [founderData, setFounderData] = useState<any[]>([]); // Declare founderData state once
 
-  // const handleTokenize = async () => {
-  //   try {
-  //     const updated = await tokenizeCapTable(founderData);
-  //     setFounderData(updated); // update UI to show "Yes"
-  //     alert("Cap table tokenized successfully!");
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("Error tokenizing cap table");
-  //   }
-  // };
+  useEffect(() => {
+    const fetchFounderData = async () => {
+      try {
+        // Fetch founder data from Firestore (assuming user is logged in)
+        const db = getFirestore();
+        const userDocRef = doc(db, "users", "user_uid"); // Replace with actual UID
+        const userDocSnap = await getDoc(userDocRef);
 
-  const [founderData, setFounderData] = useState([
-    { name: "Alice", role: "CEO", equity: "50%", vested: "Yes", cliff: "1 year", tokenized: "No" },
-    { name: "Bob", role: "CTO", equity: "30%", vested: "No", cliff: "1 year", tokenized: "No" },
-    { name: "Charlie", role: "CMO", equity: "20%", vested: "Yes", cliff: "1 year", tokenized: "Yes" },
-  ]);
+        if (userDocSnap.exists()) {
+          const founder = userDocSnap.data();
 
+          // Fetch tokenized status from Soroban using founder's publicKey
+          const sorobanData = await getFounder(founder.publicKey);
+
+          // Add tokenized info to founder data
+          setFounderData([
+            {
+              ...founder,
+              tokenized: sorobanData.tokenized ? "Yes" : "No",
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error("Error fetching founder data:", error);
+      }
+    };
+
+    fetchFounderData();
+  }, []);
+
+  // Function to handle tokenization action
+  const handleTokenize = async () => {
+    try {
+      // Loop through each founder and tokenize them
+      const db = getFirestore();
+      const updatedFounderData = await Promise.all(
+        founderData.map(async (founder) => {
+          // Assuming each founder has a publicKey field
+          const sorobanData = await getFounder(founder.publicKey);
+
+          if (sorobanData.tokenized) {
+            // Update tokenized field to Yes if the contract shows it's tokenized
+            return { ...founder, tokenized: "Yes" };
+          }
+
+          // Handle the case if not tokenized yet
+          return founder;
+        })
+      );
+
+      // Update the state with the new data
+      setFounderData(updatedFounderData);
+
+      // Optionally, save updated data to Firestore for future reference
+      const docRef = doc(db, "founders", "founder-id"); // Make sure you update the document reference
+      await setDoc(docRef, { founders: updatedFounderData });
+
+      console.log("Tokenization successful");
+    } catch (err) {
+      console.error("Error during tokenization:", err);
+    }
+  };
 
   const steps = [
     { title: "Define Roles", description: "Describe each founder’s responsibilities" },
@@ -57,19 +102,20 @@ export default function CapTablePage() {
               <TabsContent value="wizard">
                 <EquityWizard
                   steps={steps}
-                  currentStep={currentStep}
+                  currentStep={0} // Set the currentStep value (initialize with 0)
                   founderData={founderData}
-                  onNext={() => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1))}
-                  onPrev={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+                  onNext={() => { }}
+                  onPrev={() => { }}
                 />
               </TabsContent>
 
               <TabsContent value="table">
-                <CapTable founderData={founderData} onEdit={setSelectedFounder} />
+                <CapTable founderData={founderData} onEdit={handleEditRequest} />
                 <div className="mt-6 flex justify-end gap-3">
                   <Button variant="outline">Export PDF</Button>
-                  <Button className="bg-emerald-600 hover:bg-emerald-700">Tokenize via Stellar</Button>
-                  {/* <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={handleTokenize}>Tokenize via Stellar</Button> */}
+                  <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={handleTokenize}>
+                    Tokenize via Stellar
+                  </Button>
                 </div>
               </TabsContent>
             </Tabs>

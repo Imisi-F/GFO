@@ -50,11 +50,13 @@ const DocumentsPage = () => {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>All Tokenized Docs</CardTitle>
               <div className="flex items-center space-x-2">
-                <Input 
-                  placeholder="Search documents..." 
-                  className="max-w-xs"
-                  icon={<Search className="h-4 w-4" />}
-                />
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search documents..." 
+                    className="pl-9 max-w-xs"
+                  />
+                </div>
               </div>
             </CardHeader>
             <CardContent>

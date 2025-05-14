@@ -1,4 +1,5 @@
 
+// This file will be kept for reference but is no longer used in the app
 import { Link } from "react-router-dom";
 import { Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";

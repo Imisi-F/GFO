@@ -1,11 +1,17 @@
 import { signInWithPopup, auth, db, provider } from "../firebase";
 import { doc, setDoc } from "firebase/firestore";
 import * as StellarSdk from "stellar-sdk";
+import { getUserKeypairFromFirestore } from "../firebaseutils/firebaseHelpers";
 
 const Login = () => {
 
   const handleLogin = async () => {
     try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const keypair = await getUserKeypairFromFirestore(currentUser.uid);
+        console.log("Keypair from Firestore:", keypair?.publicKey);
+      }
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
@@ -25,8 +31,10 @@ const Login = () => {
       await setDoc(doc(db, "users", user.uid), {
         name: user.displayName,
         email: user.email,
+        photoURL: user.photoURL,
         publicKey,
-        secretKey, // Only do this in testnet/hackathon mode!
+        secretKey,
+        tokenized: "No",
       });
 
       console.log("Wallet saved to Firestore");

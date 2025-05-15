@@ -16,6 +16,7 @@ import { getAuth } from "firebase/auth";
 import { getFounder } from "@/utils/soroban";
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
+import { EditRequest } from "@/types";
 
 export default function CapTablePage() {
   interface Founder {
@@ -29,6 +30,23 @@ export default function CapTablePage() {
     tokenized: string;
   }
 
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      // This is the Finish button click
+      fetchFounders();  // Refresh founders on finish
+      console.log("Finished wizard and refreshed founders");
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
 
   const [founderData, setFounderData] = useState<Founder[]>([]);
   const auth = getAuth();
@@ -82,53 +100,25 @@ export default function CapTablePage() {
 
   // Update tokenization status for all founders and save to Firestore
   const handleTokenize = async () => {
-  try {
-    const updatedFounders = await Promise.all(
-      founderData.map(async (founder) => {
-        if (founder.tokenized === "Yes") return founder;
-
-        // Fetch user’s secretKey from Firestore
-        const userDoc = await getDoc(doc(db, "users", auth.currentUser!.uid));
-        const userData = userDoc.data();
-
-        if (
-          userData?.publicKey === founder.publicKey &&
-          userData?.secretKey &&
-          founder.name &&
-          typeof founder.equity === "number"
-        ) {
-          // Register founder on Soroban
-          await registerFounder(userData.secretKey, founder.name, founder.equity);
-
-          // Update Firestore
-          await updateDoc(doc(db, "founders", founder.id), {
-            tokenized: "Yes",
-          });
-
-          return { ...founder, tokenized: "Yes" };
-        }
-
-        // Re-check tokenization status in case already done
-        const sorobanData = await getFounder(founder.publicKey);
-        const tokenizedStatus = sorobanData?.tokenized ? "Yes" : "No";
-
-        if (founder.id && tokenizedStatus !== founder.tokenized) {
-          await updateDoc(doc(db, "founders", founder.id), {
-            tokenized: tokenizedStatus,
-          });
-        }
-
-        return { ...founder, tokenized: tokenizedStatus };
-      })
-    );
-
-    setFounderData(updatedFounders);
-    console.log("Tokenization complete");
-  } catch (error) {
-    console.error("Error during tokenization:", error);
-  }
-};
-
+    try {
+      const updatedFounders = await Promise.all(
+        founderData.map(async (founder) => {
+          const sorobanData = await getFounder(founder.publicKey);
+          const tokenizedStatus = sorobanData?.tokenized ? "Yes" : "No";
+          if (founder.id && tokenizedStatus !== founder.tokenized) {
+            await updateDoc(doc(db, "founders", founder.id), {
+              tokenized: tokenizedStatus,
+            });
+          }
+          return { ...founder, tokenized: tokenizedStatus };
+        })
+      );
+      setFounderData(updatedFounders);
+      console.log("Tokenization status updated");
+    } catch (error) {
+      console.error("Error during tokenization:", error);
+    }
+  };
 
   const steps = [
     { title: "Define Roles", description: "Describe each founder’s responsibilities" },
@@ -137,17 +127,18 @@ export default function CapTablePage() {
     { title: "Review", description: "Review & confirm your equity structure" },
   ];
 
-  const handleEditRequest = (updatedFounder: Founder) => {
-    // Optional: implement editing logic, like updateDoc here
+  const handleEditRequest = (request: EditRequest) => {
+    console.log("Received equity request:", request);
+    // Handle it (e.g., send to Firestore or notify stakeholders)
   };
 
   return (
     <Layout>
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Cap Table Manager</h1>
-        {/* <div className="mb-4">
+        <div className="mb-4">
           <Button onClick={handleAddFounder}>Add Founder</Button>
-        </div> */}
+        </div>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2">
             <Tabs defaultValue="wizard" className="w-full">
@@ -159,15 +150,21 @@ export default function CapTablePage() {
               <TabsContent value="wizard">
                 <EquityWizard
                   steps={steps}
-                  currentStep={0}
+                  currentStep={currentStep}
                   founderData={founderData}
-                  onNext={() => { }}
-                  onPrev={() => { }}
+                  onNext={handleNext}
+                  onPrev={handlePrev}
                 />
               </TabsContent>
 
               <TabsContent value="table">
-                <CapTable founderData={founderData} onEdit={handleEditRequest} />
+                <CapTable
+                  founderData={founderData.map(f => ({
+                    ...f,
+                    tokenized: f.tokenized ? "Yes" : "No",
+                  }))}
+                  onEditRequest={handleEditRequest}
+                />
                 <div className="mt-6 flex justify-end gap-3">
                   <Button variant="outline">Export PDF</Button>
                   <Button

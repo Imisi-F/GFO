@@ -1,12 +1,14 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import EditEquityDialog from "@/components/EditEquityDialog";
+import { EditRequest, DisplayFounder } from "@/types";
 
 interface Props {
-  founderData: any[]; // Accept founderData as a prop
-  onEdit: (founder: any) => void;
+  founderData: DisplayFounder[];
+  onEditRequest: (request: EditRequest) => void;
 }
 
-export default function CapTable({ founderData, onEdit }: Props) {
+export default function CapTable({ founderData, onEditRequest }: Props) {
   return (
     <Card className="glass-card">
       <CardHeader>
@@ -30,17 +32,18 @@ export default function CapTable({ founderData, onEdit }: Props) {
               {founderData.map((founder, i) => (
                 <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/30">
                   <td className="p-3">{founder.name}</td>
-                  <td className="p-3">{founder.role}</td>
+                  <td className="p-3">{founder.role ?? "-"}</td>
                   <td className="p-3 font-medium">{founder.equity}</td>
-                  <td className="p-3">{founder.vested}</td>
-                  <td className="p-3">{founder.cliff}</td>
+                  <td className="p-3">{founder.vested ?? "-"}</td>
+                  <td className="p-3">{founder.cliff ?? "-"}</td>
                   <td className="p-3">
                     <Badge variant={founder.tokenized === "Yes" ? "default" : "outline"}>
                       {founder.tokenized}
                     </Badge>
                   </td>
                   <td className="p-3">
-                    <button onClick={() => onEdit(founder)}>Edit</button>
+                    <EditEquityDialog founder={founder} onEditRequest={(editRequest) => console.log(editRequest)} />
+
                   </td>
                 </tr>
               ))}

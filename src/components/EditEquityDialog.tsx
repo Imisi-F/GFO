@@ -1,28 +1,40 @@
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Send, Edit } from "lucide-react";
 import { useState } from "react";
+import type { DisplayFounder, EditRequest } from "@/types";
 
-export default function EditEquityDialog({ founder, onEdit }: any) {
-  const [editRequest, setEditRequest] = useState({
+export default function EditEquityDialog({
+  founder,
+  onEditRequest,
+}: {
+  founder: DisplayFounder;
+  onEditRequest: (edit: EditRequest) => void;
+}) {
+  const [editRequest, setEditRequest] = useState<EditRequest>({
     founderName: founder.name,
-    currentEquity: founder.equity,
     requestedEquity: "",
-    justification: ""
+    justification: "",
   });
 
   const handleSend = () => {
     console.log("Sending request:", editRequest);
-    onEdit(null);
+    onEditRequest(editRequest);
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" onClick={() => onEdit(founder)}>
+        <Button variant="ghost" size="sm">
           <Edit className="h-4 w-4 mr-1" /> Edit
         </Button>
       </DialogTrigger>
@@ -37,15 +49,32 @@ export default function EditEquityDialog({ founder, onEdit }: any) {
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="current-equity" className="text-right">Current Equity</Label>
-            <Input id="current-equity" value={editRequest.currentEquity} readOnly className="col-span-3" />
+            <Input id="current-equity" value={founder.equity} readOnly className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="requested-equity" className="text-right">Requested Equity</Label>
-            <Input id="requested-equity" value={editRequest.requestedEquity} onChange={(e) => setEditRequest({ ...editRequest, requestedEquity: e.target.value })} className="col-span-3" placeholder="e.g. 40%" />
+            <Input
+              id="requested-equity"
+              value={editRequest.requestedEquity}
+              onChange={(e) =>
+                setEditRequest({ ...editRequest, requestedEquity: e.target.value })
+              }
+              className="col-span-3"
+              placeholder="e.g. 40%"
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="justification" className="text-right">Justification</Label>
-            <Textarea id="justification" value={editRequest.justification} onChange={(e) => setEditRequest({ ...editRequest, justification: e.target.value })} className="col-span-3" rows={4} placeholder="Explain why this change is requested..." />
+            <Textarea
+              id="justification"
+              value={editRequest.justification}
+              onChange={(e) =>
+                setEditRequest({ ...editRequest, justification: e.target.value })
+              }
+              className="col-span-3"
+              rows={4}
+              placeholder="Explain why this change is requested..."
+            />
           </div>
         </div>
         <div className="flex justify-end">

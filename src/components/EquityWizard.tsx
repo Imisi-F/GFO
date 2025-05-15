@@ -79,9 +79,10 @@ export default function EquityWizard({ steps, currentStep, founderData, onNext, 
 
         <div className="flex justify-between">
           <Button variant="outline" onClick={onPrev} disabled={currentStep === 0}>Previous</Button>
-          <Button onClick={onNext} disabled={currentStep === steps.length - 1}>
+          <Button onClick={onNext}>
             {currentStep === steps.length - 1 ? "Finish" : "Next"}
           </Button>
+
         </div>
       </CardContent>
     </Card>

@@ -23,6 +23,8 @@ const Login = () => {
       const secretKey = keypair.secret();
 
       console.log("Stellar Wallet:", publicKey);
+      localStorage.setItem("publicKey", publicKey);
+
 
       // STEP 2: Fund it using Friendbot (testnet only)
       await fetch(`https://friendbot.stellar.org?addr=${publicKey}`);

@@ -5,6 +5,7 @@ import EquityWizard from "@/components/EquityWizard";
 import CapTable from "@/components/CapTable";
 import AICFOCard from "@/components/AICFOCard";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   collection,
   addDoc,
@@ -21,6 +22,7 @@ import { EditRequest } from "@/types";
 export default function CapTablePage() {
   interface Founder {
     id: string;
+    userId?: string;
     name: string;
     role?: string;
     equity: number;
@@ -29,6 +31,7 @@ export default function CapTablePage() {
     publicKey: string;
     tokenized: string;
   }
+  const userPublicKey = localStorage.getItem("publicKey");
 
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -97,6 +100,27 @@ export default function CapTablePage() {
       console.error("Error adding founder:", error);
     }
   };
+  // Add a new founder with default data to Firestore
+  const handleYourselfAsFounder = async () => {
+    if (!auth.currentUser) return;
+    try {
+      const youFounder: Founder = {
+        id: 'se1f',
+        userId: auth.currentUser.uid,
+        name: auth.currentUser.displayName,
+        role: "CEO",
+        equity: 20,
+        vested: "0%",
+        cliff: "1 year",
+        publicKey: userPublicKey, // Replace with valid key
+        tokenized: "No",
+      };
+      await addDoc(collection(db, "founders"), youFounder);
+      await fetchFounders();
+    } catch (error) {
+      console.error("Error adding founder:", error);
+    }
+  };
 
   // Update tokenization status for all founders and save to Firestore
   const handleTokenize = async () => {
@@ -136,9 +160,6 @@ export default function CapTablePage() {
     <Layout>
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Cap Table Manager</h1>
-        <div className="mb-4">
-          <Button onClick={handleAddFounder}>Add Founder</Button>
-        </div>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2">
             <Tabs defaultValue="wizard" className="w-full">
@@ -173,7 +194,17 @@ export default function CapTablePage() {
                   >
                     Tokenize via Stellar
                   </Button>
-                </div>
+                </div> <br />
+                <Card className="glass-card h-full">
+                  <CardHeader>
+                    <CardTitle className="text-lg mb-0">Operations</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mt-0 flex gap-2">
+                      <Button onClick={handleAddFounder}>Add Shareholder</Button>
+                      <Button onClick={handleYourselfAsFounder}>Add Yourself</Button>
+                      <Button onClick={fetchFounders}>Refresh Table</Button>
+                    </div></CardContent> </Card>
               </TabsContent>
             </Tabs>
           </div>

@@ -3,13 +3,14 @@ import {
   Contract,
   Keypair,
   Networks,
-  Server,
   TransactionBuilder,
   BASE_FEE,
+  Server,
   nativeToScVal,
 } from "soroban-client";
 import ScVal from "soroban-client";
 import { StrKey } from "stellar-sdk";
+// import Server from "stellar-sdk";
 
 
 
@@ -68,7 +69,7 @@ export async function getFounder(publicKey: string) {
   const address = Address.account(decoded);
 
   try {
-    const source = await server.getAccount(publicKey.toString());
+    const source = await server.getAccount(localStorage.getItem("publicKey"));
 
     const tx = new TransactionBuilder(source, {
       fee: "100000",

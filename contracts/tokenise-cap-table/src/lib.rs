@@ -17,8 +17,6 @@ impl CapTable {
         env.storage().persistent().set(&(founder.clone(), symbol_short!("equity")), &equity);
         // env.storage().temporary().set(&(founder.clone(), symbol_short!("tokenised")), &true);
 
-        // Mint tokens by calling the token contract
-
     }
     pub fn mint_founder(env: Env, founder: Address, token: Address) {
     let equity: i128 = env.storage()

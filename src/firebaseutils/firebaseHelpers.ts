@@ -1,4 +1,4 @@
-import { getDoc, setDoc, doc } from "firebase/firestore";
+import { getDoc, setDoc, updateDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export async function getUserKeypairFromFirestore(uid: string) {
@@ -35,4 +35,12 @@ export async function saveFounderToFirestore(founder) {
 
   const ref = doc(db, "founders", founder.publicKey);
   await setDoc(ref, founder, { merge: true });
+}
+
+
+async function updateFounderTokenizedStatus(founderId: string | undefined, tokenized: boolean) {
+  if (!founderId) throw new Error("Founder ID is required");
+
+  const founderRef = doc(db, "founders", founderId);
+  await updateDoc(founderRef, { tokenized });
 }

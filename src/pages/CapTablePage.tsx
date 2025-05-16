@@ -11,7 +11,9 @@ import { getAuth } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { EditRequest, Founder } from "@/types";
-import { initFounder, getFounder } from "@/utils/soroban";
+import { initFounder, mintFounder, getFounder } from "@/utils/soroban";
+// import updateFounderTokenizedStatus from "../firebaseutils/firebaseHelpers";
+
 
 const tokenContractId = import.meta.env.VITE_TOKEN_CONTRACT_ID!;
 const userPublicKey = localStorage.getItem("publicKey");
@@ -101,18 +103,21 @@ export default function CapTablePage() {
   };
 
   const handleMintFounder = async (founder: Founder) => {
-    try {
-      await initFounder(founder.publicKey, founder.name, founder.equity);
-      await setDoc(doc(db, "founders", founder.id!), {
-        ...founder,
-        tokenized: true,
-      });
-      console.log(`Founder ${founder.name} tokenized successfully.`);
-    } catch (error) {
-      console.error(`Failed to tokenize founder ${founder.name}:`, error);
-      alert(`Error tokenizing founder ${founder.name}.`);
-    }
-  };
+  try {
+    await initFounder(founder.publicKey, founder.name, founder.equity);
+    await mintFounder(founder.publicKey);
+
+    await setDoc(doc(db, "founders", founder.id!), {
+      ...founder,
+      tokenized: true,
+    });
+
+    console.log(`Founder ${founder.name} tokenized successfully.`);
+  } catch (error) {
+    console.error(`Failed to tokenize founder ${founder.name}:`, error);
+    alert(`Error tokenizing founder ${founder.name}.`);
+  }
+};
 
   const handleTokenize = async () => {
     try {

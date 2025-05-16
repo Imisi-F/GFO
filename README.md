@@ -1,73 +1,96 @@
-# Welcome to your Lovable project
+<h2 align="center">Tokenized Cap Tables for the World’s Founders</h2>
 
-## Project info
+<p align="center">
+  <a href="https://stellar.org">
+    <img src="https://user-images.githubusercontent.com/sponsor-stellar.png" alt="Stellar" height="21" />
+  </a>
+</p>
 
-**URL**: https://lovable.dev/projects/2ae33b73-41b6-4ca9-8c89-e0be5004f2f1
+---
 
-## How can I edit this code?
+## What is GFO?
 
-There are several ways of editing your application.
+**GFO (Global Founder Ownership)** is a decentralized equity management platform for early-stage founders.  
+Most teams don’t have a CFO, don’t understand deal terms, or burn cash on generic legal docs. GFO fixes that.
 
-**Use Lovable**
+Founders log in with Google, build their cap table, simulate funding scenarios, and **tokenize equity on Stellar** via Soroban smart contracts — no wallet setup needed.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2ae33b73-41b6-4ca9-8c89-e0be5004f2f1) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## Features
 
-**Use your preferred IDE**
+- 🧠 **Cap Table Wizard** – Add founders, roles, equity %s, vesting, cliffs  
+- 💡 **Equity Simulator** – Run mock rounds, see dilution effects  
+- 🔒 **Soroban Smart Contracts** – Mint and manage equity tokens  
+- 🌍 **Custodial Wallets** – Onboard anyone, anywhere, without crypto UX friction  
+- 📊 **Admin Dashboard** – Track tokenization status, founder metadata, and more  
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Images
 
-Follow these steps:
+### Cap Table Interface
+![CapTable UI](https://user-images.githubusercontent.com/cap-table-ui.png)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Tokenization Flow
+![Token Flow](https://user-images.githubusercontent.com/token-flow.png)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Stack
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- **Frontend:** React (TSX) + Locofy + Tailwind  
+- **Backend:** Firebase Auth + Firestore  
+- **Smart Contracts:** Soroban (Rust) + Stellar token contract  
+- **Wallets:** Custodial Stellar accounts generated per login  
 
-**Edit a file directly in GitHub**
+### Tokenization Flow:
+1. Founder logs in via Google  
+2. App generates a Stellar keypair  
+3. Cap table inputs saved to Firestore  
+4. Soroban `init_founder()` mints equity tokens  
+5. Status syncs to UI  
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## Why It Stands Out
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- 🌐 Designed for founders *outside the crypto bubble*  
+- ⚙️ Built on real smart contracts, not just mock data  
+- 🤝 Stellar integration makes global ESOs and token-based payroll possible  
+- 📈 Fundraising simulation gives founders clarity, not chaos  
 
-## What technologies are used for this project?
+> “This is what startup equity should look like in 2025 — composable, programmable, and borderless.”
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Demo
 
-## How can I deploy this project?
+- 🎥 [Watch the Demo (Video)](https://www.canva.com/design/DAGnnzEFi1Q/6Mz_D2K-fc1pCIYQ_oO8lA/watch?utm_content=DAGnnzEFi1Q&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hb9900f63e1)
 
-Simply open [Lovable](https://lovable.dev/projects/2ae33b73-41b6-4ca9-8c89-e0be5004f2f1) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## Roadmap
 
-Yes, you can!
+- [x] Smart contract for founder minting  
+- [x] Firebase Auth + walletless onboarding  
+- [x] React frontend with cap table + simulation UI  
+- [x] Token status syncing from chain to Firestore  
+- [ ] Add investor simulation & drag-to-adjust rounds  
+- [ ] Extend to employee stock options (ESOs)  
+- [ ] Integrate Stellar anchor for off-ramping  
+- [ ] Apply to Stellar Community Fund for scaling
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Attribution & Inspiration
+
+- [Stellar + Soroban Docs](https://developers.stellar.org/)  
+- [Lovable.dev](https://www.lovable.dev/)  
+- [Firebase Authentication](https://firebase.google.com/products/auth)  
+
+---
+
+## License
+
+MIT License — feel free to fork and build your own cap table tooling for global founders.

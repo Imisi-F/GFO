@@ -8,109 +8,141 @@ import {
   Server,
   nativeToScVal,
 } from "soroban-client";
-import ScVal from "soroban-client";
-import { StrKey } from "stellar-sdk";
-// import Server from "stellar-sdk";
-
-
 
 // Setup
 const contractId = import.meta.env.VITE_CONTRACT_ID!;
 const tokenId = import.meta.env.VITE_TOKEN_CONTRACT_ID!;
 const server = new Server("https://soroban-testnet.stellar.org");
 const networkPassphrase = Networks.TESTNET;
-const accountExists = async () => {
-  try {
-    const res = await fetch(`https://soroban-testnet.stellar.org/accounts/${localStorage.getItem("publicKey")}`);
-    return res.ok;
-  } catch {
-    return false;
-  }
-};
 
 // Utility
 function getUserKeypair(): Keypair {
+  console.log("[getUserKeypair] Fetching secret key from localStorage");
   const secret = localStorage.getItem("secretKey");
-  if (!secret) throw new Error("Secret key not found in localStorage");
+  if (!secret) {
+    console.error("[getUserKeypair] Secret key not found in localStorage");
+    throw new Error("Secret key not found in localStorage");
+  }
+  console.log("[getUserKeypair] Secret key found, creating Keypair");
   return Keypair.fromSecret(secret);
 }
 
 // 🚀 Fixed initFounder function
 export async function initFounder(publicKey: string, name: string, equity: number) {
-  const founder = new Address(publicKey);
-  const user = getUserKeypair();
-  const account = await server.getAccount(user.publicKey());
-
-  const contract = new Contract(contractId);
-
-  const tx = new TransactionBuilder(account, {
-    fee: BASE_FEE,
-    networkPassphrase: networkPassphrase,
-  })
-    .addOperation(contract.call(
-      "init_founder",
-      founder.toScVal(),
-      nativeToScVal(name, { type: "string" }),
-      nativeToScVal(equity, { type: "u32" }),
-      new Address(tokenId).toScVal()
-    ))
-    .setTimeout(30)
-    .build();
-
-  tx.sign(user);
-  const res = await server.sendTransaction(tx);
-  console.log("initFounder result:", res);
-  return res;
-}
-
-export async function getFounder(publicKey: string) {
-  const contract = new Contract(contractId);
-  const decoded = StrKey.decodeEd25519PublicKey(publicKey); // Converts to Uint8Array
-  const address = Address.account(decoded);
-
   try {
-    const source = await server.getAccount(localStorage.getItem("publicKey"));
+    console.log("[initFounder] Starting initFounder with", { publicKey, name, equity });
 
-    const tx = new TransactionBuilder(source, {
-      fee: "100000",
-      networkPassphrase,
+    const founder = new Address(publicKey);
+    const user = getUserKeypair();
+    console.log("[initFounder] Getting account details for user:", user.publicKey());
+
+    const account = await server.getAccount(user.publicKey());
+    console.log("[initFounder] Account fetched:", account.accountId());
+
+    const contract = new Contract(contractId);
+
+    console.log("[initFounder] Building transaction");
+    const tx = new TransactionBuilder(account, {
+      fee: BASE_FEE,
+      networkPassphrase: networkPassphrase,
     })
-      .addOperation(contract.call("get_founder", address.toScVal()))
+      .addOperation(
+        contract.call(
+          "init_founder",
+          founder.toScVal(),
+          nativeToScVal(name, { type: "string" }),
+          nativeToScVal(equity, { type: "u32" }),
+          new Address(tokenId).toScVal()
+        )
+      )
       .setTimeout(30)
       .build();
 
+    console.log("[initFounder] Signing transaction");
+    tx.sign(user);
+
+    console.log("[initFounder] Sending transaction");
+    const res = await server.sendTransaction(tx);
+    console.log("[initFounder] Transaction sent successfully:", res);
+
+    return res;
+  } catch (error) {
+    console.error("[initFounder] Error during initFounder:", error);
+    throw error;
+  }
+}
+
+export async function getFounder(publicKey: string) {
+  console.log("[getFounder] Starting getFounder with publicKey:", publicKey);
+  try {
+    const contract = new Contract(contractId);
+    const founderAddress = new Address(publicKey);
+    console.log("[getFounder] Founder address created:", founderAddress.toString());
+
+    const userPublicKey = localStorage.getItem("publicKey");
+    console.log("[getFounder] Retrieved userPublicKey from localStorage:", userPublicKey);
+    if (!userPublicKey) throw new Error("User public key not found.");
+
+    console.log("[getFounder] Checking account existence on testnet for:", userPublicKey);
+    const res = await fetch(`https://stellar.expert/explorer/testnet/account/${userPublicKey}`);
+    console.log("[getFounder] Account existence check status:", res.status);
+    if (!res.ok) throw new Error("User account not found on Soroban testnet");
+
+    console.log("[getFounder] Getting source account for transaction");
+    const sourceAccount = await server.getAccount(userPublicKey);
+    console.log("[getFounder] Source account retrieved:", sourceAccount.accountId());
+
+    console.log("[getFounder] Building transaction to call get_founder");
+    const tx = new TransactionBuilder(sourceAccount, {
+      fee: BASE_FEE,
+      networkPassphrase,
+    })
+      .addOperation(
+        contract.call("get_founder", founderAddress.toScVal())
+      )
+      .setTimeout(30)
+      .build();
+
+    console.log("[getFounder] Simulating transaction");
     const sim = await server.simulateTransaction(tx);
-    console.log("Calling getFounder with:", publicKey);
-    console.log("Contract:", contract);
 
-
-
-    // Type guard for success response
     if ("error" in sim) {
-      console.error("Simulation error:", sim.error);
+      console.error("[getFounder] Simulation error:", sim.error);
       return null;
     }
 
+    console.log("[getFounder] Simulation result received");
     const result = sim.result?.retval;
-    if (!result || !result.map) return null;
+    if (!result) {
+      console.warn("[getFounder] No result returned from simulation");
+      return null;
+    }
+    if (!result.map) {
+      console.warn("[getFounder] Result is not a map:", result);
+      return null;
+    }
 
+    console.log("[getFounder] Parsing ScVal map result");
     const parsed = result.map().reduce((acc: any, entry: any) => {
       const key = entry.key.sym();
       const val = entry.val;
+      console.log(`[getFounder] Parsed key=${key}, val=`, val);
       acc[key] = val;
       return acc;
     }, {});
 
+    console.log("[getFounder] Parsed founder info:", parsed);
+
     return {
-      name: scValToString(parsed.name),
-      role: scValToString(parsed.role),
-      equity: Number(scValToU32(parsed.equity)),
-      vesting: scValToString(parsed.vesting),
-      cliff: scValToString(parsed.cliff),
-      tokenized: scValToBool(parsed.tokenized),
+      name: parsed.name?.str(),
+      role: parsed.role?.str(),
+      equity: parsed.equity?.u32(),
+      vesting: parsed.vesting?.str(),
+      cliff: parsed.cliff?.str(),
+      tokenized: parsed.tokenized?.b(),
     };
   } catch (err: any) {
-    console.error("Error fetching founder on-chain:", err);
+    console.error("[getFounder] Error fetching founder on-chain:", err);
     return null;
   }
 }
@@ -119,7 +151,7 @@ function scValToString(val: any): string {
   try {
     return val.str();
   } catch {
-    console.warn("Expected ScVal string, got:", val);
+    console.warn("[scValToString] Expected ScVal string, got:", val);
     return "";
   }
 }
@@ -128,7 +160,7 @@ function scValToBool(val: any): boolean {
   try {
     return val.b();
   } catch {
-    console.warn("Expected ScVal bool, got:", val);
+    console.warn("[scValToBool] Expected ScVal bool, got:", val);
     return false;
   }
 }
@@ -137,10 +169,11 @@ function scValToU32(val: any): number {
   try {
     return val.u32();
   } catch {
-    console.warn("Expected ScVal u32, got:", val);
+    console.warn("[scValToU32] Expected ScVal u32, got:", val);
     return 0;
   }
 }
+
 
 // import {
 //   Server,

@@ -1,4 +1,4 @@
-import { getDoc, doc } from "firebase/firestore";
+import { getDoc, setDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export async function getUserKeypairFromFirestore(uid: string) {
@@ -20,4 +20,19 @@ export async function getUserKeypairFromFirestore(uid: string) {
     console.error("Error fetching user keypair from Firestore:", error);
     return null;
   }
+}
+
+export async function saveFounderToFirestore(founder) {
+  // Basic validation: stop saving if key fields are missing or empty
+  if (
+    !founder ||
+    !founder.publicKey || founder.publicKey.trim() === "" ||
+    !founder.name || founder.name.trim() === ""
+  ) {
+    console.warn("Founder data is empty or invalid. Skipping save:", founder);
+    return; // Skip saving empty founder
+  }
+
+  const ref = doc(db, "founders", founder.publicKey);
+  await setDoc(ref, founder, { merge: true });
 }

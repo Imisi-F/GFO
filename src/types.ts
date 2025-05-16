@@ -1,6 +1,7 @@
 // types.ts
 export type Founder = {
-  name: string;
+  id?: string;
+  name?: string;
   role?: string;
   equity: number;
   vested?: string;
@@ -9,9 +10,9 @@ export type Founder = {
   tokenized: boolean;
 };
 
-export type DisplayFounder = Omit<Founder, "tokenized"> & {
-  tokenized: "Yes" | "No";
-};
+// export type DisplayFounder = Omit<Founder, "tokenized"> & {
+//   tokenized: false;
+// };
 
 export type EditRequest = {
   founderName: string;

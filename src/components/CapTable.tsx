@@ -1,14 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import EditEquityDialog from "@/components/EditEquityDialog";
-import { EditRequest, DisplayFounder } from "@/types";
+import { EditRequest, Founder } from "@/types";
 
 interface Props {
-  founderData: DisplayFounder[];
+  founderData: Founder[];
   onEditRequest: (request: EditRequest) => void;
+  onTokenizeFounder: (founder: Founder) => void;
 }
 
-export default function CapTable({ founderData, onEditRequest }: Props) {
+export default function CapTable({ founderData, onEditRequest, onTokenizeFounder }: Props) {
   return (
     <Card className="glass-card">
       <CardHeader>
@@ -37,7 +38,7 @@ export default function CapTable({ founderData, onEditRequest }: Props) {
                   <td className="p-3">{founder.vested ?? "-"}</td>
                   <td className="p-3">{founder.cliff ?? "-"}</td>
                   <td className="p-3">
-                    {founder.tokenized === "Yes" ? (
+                    {founder.tokenized ? (
                       <a
                         href={`https://stellar.expert/explorer/testnet/account/${founder.publicKey}`}
                         target="_blank"
@@ -45,16 +46,26 @@ export default function CapTable({ founderData, onEditRequest }: Props) {
                         className="no-underline"
                       >
                         <Badge variant="default" className="cursor-pointer hover:underline">
-                          {founder.tokenized}
+                          Tokenized
                         </Badge>
                       </a>
                     ) : (
-                      <Badge variant="outline">{founder.tokenized}</Badge>
+                      <Badge variant="outline">No</Badge>
                     )}
                   </td>
-                  <td className="p-3">
-                    <EditEquityDialog founder={founder} onEditRequest={(editRequest) => console.log(editRequest)} />
-
+                  <td className="p-3 space-y-2">
+                    <EditEquityDialog
+                      founder={founder}
+                      onEditRequest={(editRequest) => onEditRequest(editRequest)}
+                    />
+                    {!founder.tokenized && (
+                      <button
+                        className="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-700"
+                        onClick={() => onTokenizeFounder(founder)}
+                      >
+                        Tokenize
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

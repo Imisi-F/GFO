@@ -11,13 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Send, Edit } from "lucide-react";
 import { useState } from "react";
-import type { DisplayFounder, EditRequest } from "@/types";
+import type { Founder, EditRequest } from "@/types";
 
 export default function EditEquityDialog({
   founder,
   onEditRequest,
 }: {
-  founder: DisplayFounder;
+  founder: Founder;
   onEditRequest: (edit: EditRequest) => void;
 }) {
   const [editRequest, setEditRequest] = useState<EditRequest>({

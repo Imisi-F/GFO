@@ -8,6 +8,7 @@ import {
   Server,
   nativeToScVal,
 } from "soroban-client";
+// import { Transaction } from "stellar-sdk";
 
 // Setup
 const contractId = import.meta.env.VITE_CONTRACT_ID!;
@@ -189,6 +190,37 @@ export async function getFounder(publicKey: string) {
     return null;
   }
 }
+
+export async function submitSignedTransactionXDR(signedXDR: string) {
+  const horizonURL = "https://soroban-testnet.stellar.org/transactions";
+
+  const formBody = new URLSearchParams();
+  formBody.append("tx", signedXDR);
+
+  try {
+    const res = await fetch(horizonURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formBody.toString(),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.detail || "Soroban transaction failed");
+    }
+
+    const data = await res.text();
+    console.log("✅ Soroban TX Submitted:", data);
+    return data;
+  } catch (err) {
+    console.error("❌ Soroban TX Failed:", err);
+    throw err;
+  }
+}
+
+
 
 // export async function getFounder(publicKey: string) {
 //   console.log("[getFounder] Starting getFounder with publicKey:", publicKey);

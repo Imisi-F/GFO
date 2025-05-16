@@ -60,6 +60,7 @@
     "recharts": "^2.12.7",
     "sonner": "^1.5.0",
     "soroban-client": "^1.0.1",
+    "stellar-base": "^13.1.0",
     "stellar-sdk": "^13.3.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",

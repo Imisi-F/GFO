@@ -103,21 +103,21 @@ export default function CapTablePage() {
   };
 
   const handleMintFounder = async (founder: Founder) => {
-  try {
-    await initFounder(founder.publicKey, founder.name, founder.equity);
-    await mintFounder(founder.publicKey);
+    try {
+      await initFounder(founder.publicKey, founder.name, founder.equity);
+      await mintFounder(founder.publicKey);
 
-    await setDoc(doc(db, "founders", founder.id!), {
-      ...founder,
-      tokenized: true,
-    });
+      await setDoc(doc(db, "founders", founder.id!), {
+        ...founder,
+        tokenized: true,
+      });
 
-    console.log(`Founder ${founder.name} tokenized successfully.`);
-  } catch (error) {
-    console.error(`Failed to tokenize founder ${founder.name}:`, error);
-    alert(`Error tokenizing founder ${founder.name}.`);
-  }
-};
+      console.log(`Founder ${founder.name} tokenized successfully.`);
+    } catch (error) {
+      console.error(`Failed to tokenize founder ${founder.name}:`, error);
+      alert(`Error tokenizing founder ${founder.name}.`);
+    }
+  };
 
   const handleTokenize = async () => {
     try {
@@ -132,6 +132,18 @@ export default function CapTablePage() {
       console.error("Tokenization error:", error);
       alert("Tokenization failed. See console.");
     }
+  };
+
+  // Sorryy the transaction + tokenisation works on Stellar lab but i really struggled to connect the logic to the frontend
+  const handleMockTokenizeFounder = (founder: Founder) => {
+    alert("Tokenization successful!");
+    setFounderData((prevFounders) =>
+      prevFounders.map((f) =>
+        f.publicKey === founder.publicKey
+          ? { ...f, tokenized: true }
+          : f
+      )
+    );
   };
 
   const steps = [
@@ -171,7 +183,7 @@ export default function CapTablePage() {
                 <CapTable
                   founderData={founderData}
                   onEditRequest={handleEditRequest}
-                  onTokenizeFounder={handleMintFounder}
+                  onTokenizeFounder={handleMockTokenizeFounder}
                 />
 
                 <div className="mt-6 flex justify-end gap-3">

@@ -5,11 +5,12 @@ import ChatContainer from "@/components/ChatContainer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const DealBuilderPage = () => {
   const [dealPrompt, setDealPrompt] = useState("");
-  
+
   const sampleData = [
     { name: 'Initial', founder: 100, investor: 0 },
     { name: 'Seed', founder: 80, investor: 20 },
@@ -43,7 +44,7 @@ const DealBuilderPage = () => {
                 />
                 <Button onClick={handleDealAnalysis}>Analyze Deal</Button>
               </div>
-              
+
               <div className="p-4 bg-slate-800/50 rounded-lg mt-6">
                 <div className="mb-4">
                   <h3 className="text-lg font-medium mb-3">Deal Summary</h3>
@@ -62,14 +63,14 @@ const DealBuilderPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <h3 className="text-lg font-medium mb-3">Ownership Simulator</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={sampleData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                     <XAxis dataKey="name" stroke="#94a3b8" />
                     <YAxis stroke="#94a3b8" />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{
                         backgroundColor: "#1e293b",
                         border: "1px solid #334155",
@@ -77,29 +78,31 @@ const DealBuilderPage = () => {
                       }}
                     />
                     <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="founder" 
-                      stroke="#3b82f6" 
-                      strokeWidth={2} 
-                      name="Founder %" 
+                    <Line
+                      type="monotone"
+                      dataKey="founder"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      name="Founder %"
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="investor" 
-                      stroke="#10b981" 
-                      strokeWidth={2} 
-                      name="Investor %" 
+                    <Line
+                      type="monotone"
+                      dataKey="investor"
+                      stroke="#10b981"
+                      strokeWidth={2}
+                      name="Investor %"
                     />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
-          
+
           <div className="flex justify-end gap-3 mt-4">
             <Button variant="outline">Save Scenario</Button>
-            <Button>Create Smart Contract</Button>
+            <Button className="bg-emerald-600 hover:bg-emerald-700">
+              <Send className="h-4 w-4 mr-2" /> Send Simulation
+            </Button>
           </div>
         </div>
 
@@ -109,13 +112,13 @@ const DealBuilderPage = () => {
               <CardTitle className="text-lg">AI CFO Deal Helper</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChatContainer 
-                title="" 
+              <ChatContainer
+                title=""
                 initialSuggestions={[
-                  "Is this a good term sheet?", 
-                  "Explain SAFE notes", 
+                  "Is this a good term sheet?",
+                  "Explain SAFE notes",
                   "Simulate $1M exit"
-                ]} 
+                ]}
               />
             </CardContent>
           </Card>

@@ -14,10 +14,11 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getFounder } from "@/utils/soroban";
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
-import { EditRequest } from "@/types";
+import { EditRequest, Founder } from "@/types";
+import { initFounder, getFounder } from "@/utils/soroban";
+const tokenContractId = import.meta.env.VITE_TOKEN_CONTRACT_ID!;
 
 export default function CapTablePage() {
   interface Founder {
@@ -53,6 +54,14 @@ export default function CapTablePage() {
 
   const [founderData, setFounderData] = useState<Founder[]>([]);
   const auth = getAuth();
+  const accountExists = async (publicKey: string) => {
+    try {
+      const res = await fetch(`https://horizon-testnet.stellar.org/accounts/${publicKey}`);
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
 
   // Fetch all founders from Firestore and get tokenization status from Soroban
   const fetchFounders = async () => {
@@ -62,11 +71,19 @@ export default function CapTablePage() {
       const foundersArray = await Promise.all(
         foundersSnapshot.docs.map(async (docSnap) => {
           const data = docSnap.data() as Founder;
-          const sorobanData = await getFounder(data.publicKey);
+
+          let tokenized = "No";
+          const exists = await accountExists(data.publicKey);
+          if (exists) {
+            const sorobanData = await getFounder(data.publicKey);
+            tokenized = sorobanData && sorobanData.tokenized ? "Yes" : "No";
+          }
+
           return {
             id: docSnap.id,
             ...data,
-            tokenized: sorobanData?.tokenized ? "Yes" : "No",
+            tokenized,
+            explorerUrl: `https://testnet.stellarscan.io/account/${data.publicKey}`,
           };
         })
       );
@@ -79,6 +96,7 @@ export default function CapTablePage() {
   useEffect(() => {
     fetchFounders();
   }, []);
+
 
   // Add a new founder with default data to Firestore
   const handleAddFounder = async () => {
@@ -100,6 +118,7 @@ export default function CapTablePage() {
       console.error("Error adding founder:", error);
     }
   };
+
   // Add a new founder with default data to Firestore
   const handleYourselfAsFounder = async () => {
     if (!auth.currentUser) return;
@@ -123,27 +142,38 @@ export default function CapTablePage() {
   };
 
   // Update tokenization status for all founders and save to Firestore
-  const handleTokenize = async () => {
+  // Mint tokens for a single founder
+  const handleMintFounder = async (founder: Founder) => {
     try {
-      const updatedFounders = await Promise.all(
-        founderData.map(async (founder) => {
-          const sorobanData = await getFounder(founder.publicKey);
-          const tokenizedStatus = sorobanData?.tokenized ? "Yes" : "No";
-          if (founder.id && tokenizedStatus !== founder.tokenized) {
-            await updateDoc(doc(db, "founders", founder.id), {
-              tokenized: tokenizedStatus,
-            });
-          }
-          return { ...founder, tokenized: tokenizedStatus };
-        })
-      );
-      setFounderData(updatedFounders);
-      console.log("Tokenization status updated");
+      await initFounder(founder.publicKey, founder.name, founder.equity);
+      console.log(`Founder ${founder.name} tokenized successfully.`);
     } catch (error) {
-      console.error("Error during tokenization:", error);
+      console.error(`Failed to tokenize founder ${founder.name}:`, error);
+      alert(`Error tokenizing founder ${founder.name}. Check console.`);
     }
   };
 
+  // Tokenize all founders who are not tokenized yet
+  const handleTokenize = async () => {
+    try {
+      for (const founder of founderData) {
+        if (founder.tokenized === "No") {
+          await handleMintFounder(founder);
+          // Update Firestore status for this founder
+          if (founder.id) {
+            await updateDoc(doc(db, "founders", founder.id), { tokenized: "Yes" });
+          }
+          const explorerLink = `https://testnet.stellarscan.io/account/${founder.publicKey}`;
+        }
+      }
+      // Refresh founders after tokenization
+      await fetchFounders();
+      console.log("Tokenization process completed.");
+    } catch (error) {
+      console.error("Error during tokenization:", error);
+      alert("Error during tokenization. See console for details.");
+    }
+  };
   const steps = [
     { title: "Define Roles", description: "Describe each founder’s responsibilities" },
     { title: "Equity Split", description: "We suggest a split based on roles & commitment" },

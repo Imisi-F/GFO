@@ -37,9 +37,20 @@ export default function CapTable({ founderData, onEditRequest }: Props) {
                   <td className="p-3">{founder.vested ?? "-"}</td>
                   <td className="p-3">{founder.cliff ?? "-"}</td>
                   <td className="p-3">
-                    <Badge variant={founder.tokenized === "Yes" ? "default" : "outline"}>
-                      {founder.tokenized}
-                    </Badge>
+                    {founder.tokenized === "Yes" ? (
+                      <a
+                        href={`https://stellar.expert/explorer/testnet/account/${founder.publicKey}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="no-underline"
+                      >
+                        <Badge variant="default" className="cursor-pointer hover:underline">
+                          {founder.tokenized}
+                        </Badge>
+                      </a>
+                    ) : (
+                      <Badge variant="outline">{founder.tokenized}</Badge>
+                    )}
                   </td>
                   <td className="p-3">
                     <EditEquityDialog founder={founder} onEditRequest={(editRequest) => console.log(editRequest)} />

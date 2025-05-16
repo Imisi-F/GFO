@@ -1,11 +1,13 @@
 [workspace]
 resolver = "2"
 members = [
-  "contracts/*",
+  "token",
+  "tokenise-cap-table"
 ]
 
 [workspace.dependencies]
 soroban-sdk = "22.0.0"
+soroban-token-sdk = "22.0.0"
 
 [profile.release]
 opt-level = "z"

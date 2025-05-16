@@ -2,6 +2,7 @@ import { signInWithPopup, auth, db, provider } from "../firebase";
 import { doc, setDoc } from "firebase/firestore";
 import * as StellarSdk from "stellar-sdk";
 import { getUserKeypairFromFirestore } from "../firebaseutils/firebaseHelpers";
+import { fundTestnetAccount } from "@/utils/fundAccount";
 
 const Login = () => {
 
@@ -24,10 +25,11 @@ const Login = () => {
 
       console.log("Stellar Wallet:", publicKey);
       localStorage.setItem("publicKey", publicKey);
+      localStorage.setItem("secretKey", secretKey); // store to firebase lol
 
 
       // STEP 2: Fund it using Friendbot (testnet only)
-      await fetch(`https://friendbot.stellar.org?addr=${publicKey}`);
+      await fundTestnetAccount(publicKey);
 
       // STEP 3: Save wallet to Firestore
       await setDoc(doc(db, "users", user.uid), {
